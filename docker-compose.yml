@@ -1,0 +1,27 @@
+x-variables:
+  network_name: &network_name microservices-net
+  mysql_root_password: &mysql_root_password bank
+  mysql_user: &mysql_user bank
+
+
+services:
+  mysql:
+    image: mysql:8.3.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: *mysql_root_password
+      MYSQL_USER: *mysql_user
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - *network_name
+    restart: unless-stopped
+
+
+
+networks:
+  microservices-net:
+    driver: bridge
+

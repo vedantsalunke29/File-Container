@@ -1,0 +1,27 @@
+spring:
+  config:
+    import: optional:configserver:http://localhost:8889
+  application:
+    name: image-container-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/image_service
+    username: root
+    password: vedant
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB  # Optional
+      max-request-size: 5MB  # Optional
+image-storage-service:
+  url: http://127.0.0.1:8091/
+server:
+  port: 8090
+
+
+app:
+  image-directory: uploads/

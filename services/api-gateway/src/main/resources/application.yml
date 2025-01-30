@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://localhost:8093
+          predicates:
+            - Path=/api/auth/**
+
+        - id: image-container-service
+          uri: http://localhost:8090
+          predicates:
+            - Path=/api/image-container/**
+
+        - id: image-storage-service
+          uri: http://localhost:8091
+          predicates:
+            - Path=/api/image-storage/**
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET:hasjdajsdjksdj29eje92emi23e9em3e9ek3meke9ejejnwe9qwenwje}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
