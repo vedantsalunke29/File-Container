@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter implements WebFilter {
         }
 
         String token = extractJwtFromRequest(request);
-
+        System.out.println(token);
         if (token == null || !validateToken(token)) {
             exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();

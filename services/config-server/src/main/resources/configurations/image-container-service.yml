@@ -1,23 +1,30 @@
-spring:
-  application:
-    name: image-container-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/image_service
-    username: root
-    password: vedant
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    jpa:
-      hibernate:
-        ddl-auto: update
-      show-sql: true
-  kafka:
-    bootstrap-servers: localhost:9092
-image-storage-service:
-  url: http://127.0.0.1:8091/
-
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
 server:
   port: 8090
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      imageStorageCB:
+        register-health-indicator: true
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        minimum-number-of-calls: 5
+  timelimiter:
+    instances:
+      imageStorageCB:
+        timeout-duration: 3s
+  retry:
+    instances:
+      imageStorageRetry:
+        max-attempts: 3
+        wait-duration: 2s

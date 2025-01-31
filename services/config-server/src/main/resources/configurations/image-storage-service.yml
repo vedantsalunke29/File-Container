@@ -1,21 +1,10 @@
-spring:
-  application:
-    name: image-storage-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/image_storage
-    username: root
-    password: vedant
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    jpa:
-      hibernate:
-        ddl-auto: update
-      show-sql: true
-  kafka:
-    bootstrap-servers: localhost:9092
-
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 server:
   port: 8091
+
+app:
+  image-directory: uploads/
+  image-base-url: http://localhost:8091/images

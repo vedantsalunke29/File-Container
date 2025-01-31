@@ -18,8 +18,8 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
   security:
     jwt:
-      secret: ${JWT_SECRET:hasjdajsdjksdj29eje92emi23e9em3e9ek3meke9ejejnwe9qwenwje}
-      expiration: ${JWT_EXPIRATION:86400000}
+      secret: hasjdajsdjksdj29eje92emi23e9em3e9ek3meke9ejejnwe9qwenwje
+
 
 server:
   port: 8093

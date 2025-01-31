@@ -26,33 +26,6 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
 
-  resilience4j.circuitbreaker:
-    instances:
-      myService:
-        registerHealthIndicator: true
-        slidingWindowSize: 100
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10000ms
-        ringBufferSizeInClosedState: 100
-        ringBufferSizeInHalfOpenState: 10
 
-  resilience4j.retry:
-    instances:
-      myService:
-        maxAttempts: 3
-        waitDuration: 500ms
-        retryExceptions:
-          - org.springframework.web.client.HttpServerErrorException
 
-  resilience4j.timelimiter:
-    instances:
-      myService:
-        timeoutDuration: 5s
-
-server:
-  port: 8091
-
-app:
-  image-directory: uploads/
-  image-base-url: http://localhost:8091/images
 
