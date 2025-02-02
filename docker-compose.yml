@@ -63,6 +63,7 @@ services:
     networks:
       - *network_name
     restart: unless-stopped
+
   discovery-server:
     build: ./services/discovery-server
     container_name: discovery-server
@@ -72,6 +73,29 @@ services:
       - *network_name
     restart: unless-stopped
 
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - *network_name
+    restart: unless-stopped
+
+  auth-service:
+    build: ./services/auth-service
+    container_name: image-container-service
+    environment:
+      MYSQL_USER: *mysql_user
+      MYSQL_PASSWORD: *mysql_root_password
+    ports:
+      - "8090:8090"
+    networks:
+      - *network_name
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
 networks:
   microservices-net:
     driver: bridge

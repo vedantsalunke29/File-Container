@@ -1,30 +1,13 @@
-# Use a Java base image for the build stage
-FROM openjdk:23-jdk-slim as builder
+FROM openjdk:23
 
-# Set the working directory inside the container
-WORKDIR /app
 
-# Copy the local Maven project into the container
-COPY . /app
+LABEL image.name="image-container-service"
 
-# Set the environment variable for the build command
-ENV MAVEN_OPTS="-Xmx512m -Xms256m"
 
-# Install Maven (if needed) and build the project
-RUN apt-get update && apt-get install -y maven
-RUN mvn clean package -DskipTests
+ADD target/image-container-service-0.0.1-SNAPSHOT.jar image-container-service-0.0.1-SNAPSHOT.jar
 
-# Use a smaller base image to run the application
-FROM openjdk:17-jdk-slim
-
-# Set the working directory inside the container
-WORKDIR /app
-
-# Copy the JAR file built by Maven from the builder stage
-COPY --from=builder /app/target/image-container-service-0.0.1-SNAPSHOT.jar /app/image-container-service.jar
-
-# Expose the port the app will run on
+# Expose the correct port
 EXPOSE 8090
 
-# Set the entry point for the application
-ENTRYPOINT ["java", "-jar", "/app/image-container-service.jar"]
+# Run the application
+ENTRYPOINT ["java", "-jar", "image-container-service-0.0.1-SNAPSHOT.jar"]
