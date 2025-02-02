@@ -10,7 +10,7 @@ import lombok.Setter;
 public class ApiResponse {
     private boolean success;
     private String message;
-    private String name;
+    private Long id;
     private String downloadUrl;
     public ApiResponse(boolean success, String message) {
         this.success = success;
@@ -33,12 +33,12 @@ public class ApiResponse {
         this.success = success;
     }
 
-    public String getName() {
-        return name;
+    public Long getId() {
+        return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDownloadUrl() {

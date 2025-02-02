@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 public class ApiResponse {
     private boolean success;
     private String message;
-    private String name;
+    private Long id;
     private String downloadUrl;
 
     public ApiResponse(boolean success, String message) {
@@ -18,8 +18,8 @@ public class ApiResponse {
         this.message = message;
     }
 
-    public void setName(String name) { // Manually added setter to resolve the issue
-        this.name = name;
+    public void setId(Long id) { // Manually added setter to resolve the issue
+        this.id = id;
     }
 
     public boolean isSuccess() {
@@ -46,7 +46,7 @@ public class ApiResponse {
         this.downloadUrl = downloadUrl;
     }
 
-    public String getName() {
-        return name;
+    public Long getId() {
+        return id;
     }
 }

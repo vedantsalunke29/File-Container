@@ -95,12 +95,12 @@ public class ImageServiceImplementation implements ImageService {
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 ApiResponse responseBody = response.getBody();
                 Image image = new Image();
-                image.setName(responseBody.getName());
+                image.setName(imageName);
                 image.setUrl(responseBody.getDownloadUrl());
                 image.setType("image");
                 imageRepository.save(image);
 
-                return ResponseEntity.ok("Image stored and saved successfully.");
+                return ResponseEntity.ok("Image stored and saved successfully and Image Id: " + responseBody.getId());
             } else {
                 return ResponseEntity.status(response.getStatusCode())
                         .body("Failed to store image. Error: " + Objects.requireNonNull(response.getBody()).getMessage());

@@ -69,7 +69,7 @@ public class StorageServiceImplementation implements StorageService {
             storageRepository.save(image);
 
             ApiResponse response = new ApiResponse(true, "Image stored successfully");
-            response.setName(image.getImageName());
+            response.setId(image.getId());
             response.setDownloadUrl(image.getImageUrl());
 
             return response;
