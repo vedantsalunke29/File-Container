@@ -1,5 +1,57 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: authServiceCB
+                fallbackUri: forward:/fallback/auth
+            - name: Retry
+              args:
+                retries: 3
+                series: SERVER_ERROR
+                methods: GET,POST
+            - StripPrefix=1
+
+        - id: image-container-service
+          uri: lb://IMAGE-CONTAINER-SERVICE
+          predicates:
+            - Path=/api/files/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: fileServiceCB
+                fallbackUri: forward:/fallback/file
+            - name: Retry
+              args:
+                retries: 2
+                series: SERVER_ERROR
+            - StripPrefix=1
+
+        - id: image-storage-service
+          uri: lb://IMAGE-STORAGE-SERVICE
+          predicates:
+            - Path=/api/image-storage/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: imageStorageCB
+                fallbackUri: forward:/fallback/image
+            - StripPrefix=1
+
+  security:
+    jwt:
+      secret: ZCU9gTY/qD2PRjt+ENxyItf1ba5Bl+lRXqtkeg6xIhaqvPcn8TSsjy0kkyocQoX/
+
 eureka:
   client:
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
@@ -13,29 +65,55 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health, circuitbreakers, metrics, prometheus
   endpoint:
     health:
       show-details: always
+    circuitbreakers:
+      enabled: true
 
 resilience4j:
   circuitbreaker:
     configs:
-      default.register-health-indicator: true
-      default.sliding-window-size: 10
-      default.sliding-window-type: COUNT_BASED
-      default.failure-rate-threshold: 50
-      default.wait-duration-in-open-state:
-        seconds: 5
-      default.permitted-number-of-calls-in-half-open-state: 3
-      default.automatic-transition-from-open-to-half-open-enabled: true
-      default.minimum-number-of-calls: 5
+      default:
+        register-health-indicator: true
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        minimum-number-of-calls: 5
+    instances:
+      authServiceCB:
+        baseConfig: default
+      fileServiceCB:
+        baseConfig: default
+        failure-rate-threshold: 60
+      imageStorageCB:
+        baseConfig: default
+
   timelimiter:
     configs:
-      default.timeout-duration:
-        seconds: 3
+      default:
+        timeout-duration: 3s
+
   retry:
     configs:
-      default.max-attempts: 3
-      default.wait-duration:
-        seconds: 2
+      default:
+        max-attempts: 3
+        wait-duration: 2s
+    instances:
+      authRetry:
+        baseConfig: default
+      fileRetry:
+        baseConfig: default
+        max-attempts: 2
+
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+
+

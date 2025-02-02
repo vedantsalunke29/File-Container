@@ -3,28 +3,6 @@ spring:
     import: optional:configserver:http://localhost:8889
   application:
     name: image-storage-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/storage_service
-    username: root
-    password: vedant
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 5MB
-      max-request-size: 5MB
-      location: ${java.io.tmpdir}
-  mvc:
-    content negotiation:
-      favor-parameter: true
-      media-types:
-        json: application/json
-    pathmatch:
-      matching-strategy: ant_path_matcher
 
 
 

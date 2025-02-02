@@ -3,23 +3,4 @@ spring:
     import: optional:configserver:http://localhost:8889
   application:
     name: auth-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/auth_service
-    username: root
-    password: vedant
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
-  security:
-    jwt:
-      secret: hasjdajsdjksdj29eje92emi23e9em3e9ek3meke9ejejnwe9qwenwje
 
-
-server:
-  port: 8093

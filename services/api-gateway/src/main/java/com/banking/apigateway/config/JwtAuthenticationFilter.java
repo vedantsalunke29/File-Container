@@ -26,7 +26,9 @@ public class JwtAuthenticationFilter implements WebFilter {
             "/api/auth/login",
             "/api/auth/register",
             "/v3/api-docs",
-            "/swagger-ui"
+            "/swagger-ui",
+            "/actuator/prometheus",
+            "/actuator/circuitbreakers"
     );
 
     @Override
@@ -39,7 +41,6 @@ public class JwtAuthenticationFilter implements WebFilter {
         }
 
         String token = extractJwtFromRequest(request);
-        System.out.println(token);
         if (token == null || !validateToken(token)) {
             exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();

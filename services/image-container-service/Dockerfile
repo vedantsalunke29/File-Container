@@ -5,7 +5,7 @@ FROM openjdk:23-jdk-slim as builder
 WORKDIR /app
 
 # Copy the local Maven project into the container
-COPY ../config-server /app
+COPY . /app
 
 # Set the environment variable for the build command
 ENV MAVEN_OPTS="-Xmx512m -Xms256m"
@@ -21,10 +21,10 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the JAR file built by Maven from the builder stage
-COPY --from=builder /app/target/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway.jar
+COPY --from=builder /app/target/image-container-service-0.0.1-SNAPSHOT.jar /app/image-container-service.jar
 
 # Expose the port the app will run on
-EXPOSE 8080
+EXPOSE 8090
 
 # Set the entry point for the application
-ENTRYPOINT ["java", "-jar", "/app/api-gateway.jar"]
+ENTRYPOINT ["java", "-jar", "/app/image-container-service.jar"]

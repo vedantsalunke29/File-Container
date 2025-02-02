@@ -1,7 +1,6 @@
 package com.banking.authservice.utils;
 
-
-
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import io.jsonwebtoken.Jwts;
@@ -10,14 +9,19 @@ import java.security.Key;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtGenerator {
-    //private static final KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
-    private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+
+    private final Key key;
+
+    public JwtGenerator(@Value("${spring.security.jwt.secret}") String jwtSecret) {
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
@@ -26,15 +30,16 @@ public class JwtGenerator {
 
         String token = Jwts.builder()
                 .setSubject(username)
-                .setIssuedAt( new Date())
+                .setIssuedAt(new Date())
                 .setExpiration(expireDate)
-                .signWith(key,SignatureAlgorithm.HS512)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
         System.out.println("New token :");
         System.out.println(token);
         return token;
     }
-    public String getUsernameFromJWT(String token){
+
+    public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -51,8 +56,7 @@ public class JwtGenerator {
                     .parseClaimsJws(token);
             return true;
         } catch (Exception ex) {
-            throw new AuthenticationCredentialsNotFoundException("JWT was exprired or incorrect",ex.fillInStackTrace());
+            throw new AuthenticationCredentialsNotFoundException("JWT was expired or incorrect", ex.fillInStackTrace());
         }
     }
-
 }

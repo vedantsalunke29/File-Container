@@ -1,11 +1,14 @@
 package com.banking.imagecontainerservice.service.implemention;
 
-import com.banking.imagecontainerservice.dto.ImageRequest;
 import com.banking.imagecontainerservice.dto.ImageResponse;
 import com.banking.imagecontainerservice.model.Image;
 import com.banking.imagecontainerservice.repository.ImageRepository;
 import com.banking.imagecontainerservice.service.ImageService;
 import com.banking.imagecontainerservice.utils.ApiResponse;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -13,7 +16,6 @@ import org.springframework.http.*;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -28,12 +30,13 @@ import java.util.Objects;
 
 @Service
 public class ImageServiceImplementation implements ImageService {
+    private static final Logger logger = LoggerFactory.getLogger(ImageServiceImplementation.class);
+
     private final ImageRepository imageRepository;
     private final RestTemplate restTemplate;
 
     @Value("${image-storage-service.url}")
     private String imageStorageServiceUrl;
-
 
     @Autowired
     public ImageServiceImplementation(ImageRepository imageRepository) {
@@ -47,6 +50,8 @@ public class ImageServiceImplementation implements ImageService {
     }
 
     @Override
+    @CircuitBreaker(name = "imageStorageCB", fallbackMethod = "uploadFallback")
+    @Retry(name = "imageStorageRetry")
     public ResponseEntity<String> uploadImage(@RequestParam("imageName") String imageName,
                                               @RequestParam("imageFile") MultipartFile imageFile) {
         try {
@@ -77,10 +82,7 @@ public class ImageServiceImplementation implements ImageService {
             HttpEntity<ByteArrayResource> fileEntity = new HttpEntity<>(fileResource, fileHeaders);
             body.add("imageFile", fileEntity);
 
-
-
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
             String storageEndpoint = imageStorageServiceUrl + "/api/storage/store";
 
             ResponseEntity<ApiResponse> response = restTemplate.exchange(
@@ -98,21 +100,26 @@ public class ImageServiceImplementation implements ImageService {
                 image.setType("image");
                 imageRepository.save(image);
 
-                return ResponseEntity.ok("Image submitted for storage and saved in the database successfully.");
+                return ResponseEntity.ok("Image stored and saved successfully.");
             } else {
                 return ResponseEntity.status(response.getStatusCode())
                         .body("Failed to store image. Error: " + Objects.requireNonNull(response.getBody()).getMessage());
             }
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while processing the image file: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while uploading the image: " + e.getMessage());
+                    .body("Error processing image file: " + e.getMessage());
         }
     }
 
+    public ResponseEntity<String> uploadFallback(String imageName, MultipartFile imageFile, Throwable t) {
+        logger.error("Image Storage Service is unavailable. Fallback triggered: {}", t.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("Storage service is currently unavailable. Please try again later.");
+    }
+
     @Override
+    @CircuitBreaker(name = "imageStorageCB", fallbackMethod = "getImageFallback")
+    @Retry(name = "imageStorageRetry")
     public ImageResponse getImage(Long id) {
         try {
             String getEndpoint = imageStorageServiceUrl + "/api/storage/{id}";
@@ -126,10 +133,15 @@ public class ImageServiceImplementation implements ImageService {
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 return response.getBody();
             } else {
-                throw new RuntimeException("Failed to retrieve the image from the storage service.");
+                throw new RuntimeException("Failed to retrieve the image from storage.");
             }
         } catch (Exception e) {
-            throw new RuntimeException("An error occurred while retrieving the image: " + e.getMessage());
+            throw new RuntimeException("Error retrieving image: " + e.getMessage());
         }
+    }
+
+    public ImageResponse getImageFallback(Long id, Throwable t) {
+        logger.error("Failed to retrieve image from storage. Returning fallback response.");
+        return new ImageResponse(id, "Fallback image URL", "Fallback image description");
     }
 }

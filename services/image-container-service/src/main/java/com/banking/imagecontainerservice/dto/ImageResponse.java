@@ -12,6 +12,12 @@ public class ImageResponse {
     private String name;
     private String downloadUrl;
 
+    public ImageResponse(Long id, String fallbackImageUrl, String fallbackImageDescription) {
+        this.id = id;
+        this.name = fallbackImageUrl;
+        this.downloadUrl = fallbackImageDescription;
+    }
+
     public Long getId() {
         return id;
     }

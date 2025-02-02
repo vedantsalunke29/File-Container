@@ -9,7 +9,9 @@ import java.util.List;
 public class RouteValidator {
     private static final List<String> openEndpoints = List.of(
             "/api/auth/login",
-            "/api/auth/register"
+            "/api/auth/register",
+            "/actuator/prometheus",
+            "/actuator/circuitbreakers"
     );
 
     public boolean isSecured(ServerHttpRequest request) {

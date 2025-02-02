@@ -1,7 +1,7 @@
 x-variables:
   network_name: &network_name microservices-net
-  mysql_root_password: &mysql_root_password bank
-  mysql_user: &mysql_user bank
+  mysql_root_password: &mysql_root_password root
+  mysql_user: &mysql_user vedant
 
 
 services:
@@ -19,7 +19,77 @@ services:
       - *network_name
     restart: unless-stopped
 
+  image-storage-service:
+    image: sha256:6af7b9e939e275d88126d4f7cb4cb0877906e4da3783a1b5737f1586419c76bd
+    container_name: image-storage-service
+    environment:
+      MYSQL_USER: *mysql_user
+      MYSQL_PASSWORD: *mysql_root_password
+    ports:
+      - "8091:8091"
+    networks:
+      - *network_name
+    depends_on:
+      - mysql
+    restart: unless-stopped
+  image-container-service:
+    image: sha256:djndnjd9e939e27wewr26d4f7cb4cb0877906e4da3783a1b5238h382h8hedjddnd
+    container_name: image-container-service
+    environment:
+      MYSQL_USER: *mysql_user
+      MYSQL_PASSWORD: *mysql_root_password
+    ports:
+      - "8090:8090"
+    networks:
+      - *network_name
+    depends_on:
+      - mysql
+    restart: unless-stopped
+  auth-service:
+    image: sha256:6af7b9e939e275d88126d4f7cb4cb0877906e4da37samdmsdfmdfmdf9023nd9d23
+    container_name: auth-service
+    environment:
+      MYSQL_USER: *mysql_user
+      MYSQL_PASSWORD: *mysql_root_password
+    ports:
+      - "8093:8093"
+    networks:
+      - *network_name
+    depends_on:
+      - mysql
+    restart: unless-stopped
+  discovery-server:
+    image: sha256:4jdewnb9e939e275d88126d4f7cb4cb08779023348h3rnfn9b5737f158641sdf
+    container_name: discovery-server
+    environment:
+      MYSQL_USER: *mysql_user
+      MYSQL_PASSWORD: *mysql_root_password
+    ports:
+      - "8761:8761"
+    networks:
+      - *network_name
+    depends_on:
+      - mysql
+    restart: unless-stopped
+  api-gateway:
+    image: sha256:gwef7b9e939e275d88126d4f7cb4cb0877906e4da3783a1b5737f158j3293nr9
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - *network_name
+    depends_on:
+      - mysql
+    restart: unless-stopped
 
+  config-server:
+    image: sha256:b1e782e3b4e7dc1a24edf08c48b970e4ef8735a9b8384f9f2aa85c2c69a524b4
+    container_name: config-server
+    ports:
+      - "8889:8889"
+    networks:
+      - *network_name
+    restart: unless-stopped
 
 networks:
   microservices-net:
