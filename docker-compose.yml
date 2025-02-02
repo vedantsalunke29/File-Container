@@ -1,8 +1,9 @@
+version: '3.8'
+
 x-variables:
   network_name: &network_name microservices-net
   mysql_root_password: &mysql_root_password root
   mysql_user: &mysql_user vedant
-
 
 services:
   mysql:
@@ -18,9 +19,14 @@ services:
     networks:
       - *network_name
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
   image-storage-service:
-    image: sha256:6af7b9e939e275d88126d4f7cb4cb0877906e4da3783a1b5737f1586419c76bd
+    build: ./services/image-storage-service
     container_name: image-storage-service
     environment:
       MYSQL_USER: *mysql_user
@@ -30,10 +36,12 @@ services:
     networks:
       - *network_name
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     restart: unless-stopped
+
   image-container-service:
-    image: sha256:djndnjd9e939e27wewr26d4f7cb4cb0877906e4da3783a1b5238h382h8hedjddnd
+    build: ./services/image-container-service
     container_name: image-container-service
     environment:
       MYSQL_USER: *mysql_user
@@ -43,50 +51,23 @@ services:
     networks:
       - *network_name
     depends_on:
-      - mysql
-    restart: unless-stopped
-  auth-service:
-    image: sha256:6af7b9e939e275d88126d4f7cb4cb0877906e4da37samdmsdfmdfmdf9023nd9d23
-    container_name: auth-service
-    environment:
-      MYSQL_USER: *mysql_user
-      MYSQL_PASSWORD: *mysql_root_password
-    ports:
-      - "8093:8093"
-    networks:
-      - *network_name
-    depends_on:
-      - mysql
-    restart: unless-stopped
-  discovery-server:
-    image: sha256:4jdewnb9e939e275d88126d4f7cb4cb08779023348h3rnfn9b5737f158641sdf
-    container_name: discovery-server
-    environment:
-      MYSQL_USER: *mysql_user
-      MYSQL_PASSWORD: *mysql_root_password
-    ports:
-      - "8761:8761"
-    networks:
-      - *network_name
-    depends_on:
-      - mysql
-    restart: unless-stopped
-  api-gateway:
-    image: sha256:gwef7b9e939e275d88126d4f7cb4cb0877906e4da3783a1b5737f158j3293nr9
-    container_name: api-gateway
-    ports:
-      - "8080:8080"
-    networks:
-      - *network_name
-    depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     restart: unless-stopped
 
   config-server:
-    image: sha256:b1e782e3b4e7dc1a24edf08c48b970e4ef8735a9b8384f9f2aa85c2c69a524b4
+    build: ./services/config-server
     container_name: config-server
     ports:
       - "8889:8889"
+    networks:
+      - *network_name
+    restart: unless-stopped
+  discovery-server:
+    build: ./services/discovery-server
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
     networks:
       - *network_name
     restart: unless-stopped
@@ -94,4 +75,3 @@ services:
 networks:
   microservices-net:
     driver: bridge
-

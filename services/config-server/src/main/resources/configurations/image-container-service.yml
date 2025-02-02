@@ -14,7 +14,7 @@ spring:
       max-file-size: 5MB
       max-request-size: 5MB
 image-storage-service:
-  url: http://127.0.0.1:8091/
+  url: http://localhost:8091/
 
 app:
   image-directory: uploads/

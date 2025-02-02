@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/storage_service
-    username: ${MYSQL_USER}
-    password: ${MYSQL_ROOT_PASSWORD}
+    username: root
+    password: vedant
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
